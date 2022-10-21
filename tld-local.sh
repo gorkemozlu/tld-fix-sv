@@ -1,0 +1,2 @@
+#!/bin/bash
+for f in /etc/systemd/network/*.network; do if grep -F '[Network]' "${f}" && ! grep -E ^Domains=customerdomain.local "${f}"; then sed -i '/^\[Network\]/a Domains=customerdomain.local' "${f}"; fi; done; systemctl restart systemd-networkd systemd-resolved
