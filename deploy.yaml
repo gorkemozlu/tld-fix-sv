@@ -68,6 +68,8 @@ metadata:
   name: hello
 spec:
   schedule: "* * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
       template:
