@@ -1,0 +1,114 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tld-sa
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: psp-hostpath
+spec:
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  volumes:
+  - '*'
+  privileged: false  # Don't allow privileged pods!
+  hostNetwork: true
+  allowedHostPaths:
+  - pathPrefix: /etc/kubernetes/
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: role-authorize-hostpath
+rules:
+- apiGroups: ['policy']
+  resources: ['podsecuritypolicies']
+  verbs:     ['use']
+  resourceNames:
+  - psp-hostpath
+---
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: tld-sa-cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: tld-sa
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: ""
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: rolebinding-hostpath-tld-sa
+roleRef:
+  kind: Role
+  name: role-authorize-hostpath
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: tld-sa
+    namespace: default
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: tld-sa
+          containers:
+          - name: hello
+            image: harbor.dorn.gorke.ml/tools/kubectl:v1.22
+            imagePullPolicy: Always
+            env:
+            - name: TLD
+              value: "gorkem.local"
+            - name: NS
+              value: "tanzuns1"
+            - name: CLUSTER_NAME
+              value: "tkgs-cluster-9"
+            volumeMounts:
+            - name: k8s-vol
+              mountPath: /.kube/config
+          hostNetwork: true
+          tolerations:
+          - key: CriticalAddonsOnly
+            operator: Exists
+          - effect: NoSchedule
+            key: node-role.kubernetes.io/master
+            operator: Exists
+          - effect: NoSchedule
+            key: kubeadmNode
+            operator: Equal
+            value: master
+          - effect: NoExecute
+            key: node.kubernetes.io/not-ready
+            operator: Exists
+            tolerationSeconds: 300
+          - effect: NoExecute
+            key: node.kubernetes.io/unreachable
+            operator: Exists
+            tolerationSeconds: 300
+          restartPolicy: OnFailure
+          volumes:
+            - name: k8s-vol
+              hostPath:
+                path: /etc/kubernetes/
+---
