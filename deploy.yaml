@@ -84,8 +84,6 @@ spec:
               value: "gorkem.local"
             - name: NS
               value: "tanzuns1"
-            - name: CLUSTER_NAME
-              value: "tkgs-cluster-9"
             volumeMounts:
             - name: k8s-vol
               mountPath: /.kube/config

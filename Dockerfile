@@ -20,7 +20,7 @@ ENV HOME="/" \
 RUN mkdir -p /opt/bitnami
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Install required system packages and dependencies
-RUN install_packages ca-certificates curl git jq procps openssh-client wget git gcc
+RUN install_packages ca-certificates curl git jq procps openssh-client wget git gcc jq vim
 
 RUN wget -P /tmp "https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz"
 RUN tar -C /usr/local -xzf "/tmp/go${GO_VERSION}.linux-amd64.tar.gz"
