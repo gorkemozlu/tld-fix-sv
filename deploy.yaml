@@ -78,7 +78,7 @@ spec:
           containers:
           - name: hello
             image: harbor.dorn.gorke.ml/tools/kubectl:v1.22
-            imagePullPolicy: Always
+            imagePullPolicy: IfNotPresent
             env:
             - name: TLD
               value: "gorkem.local"
