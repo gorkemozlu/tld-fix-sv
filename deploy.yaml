@@ -77,7 +77,7 @@ spec:
           serviceAccountName: tld-sa
           containers:
           - name: hello
-            image: harbor.dorn.gorke.ml/tools/kubectl:v1.22
+            image: harbor.mgt.mytanzu.org/tools/kubectl:v1.22
             imagePullPolicy: IfNotPresent
             env:
             - name: TLD
